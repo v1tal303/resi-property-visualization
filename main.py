@@ -79,7 +79,10 @@ while pages_remaining >= 0 and start_condition:
 
     property_price = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-priceValue")
     for i in property_price:
-        price_list.append(int(i.text.replace("£", "").replace(",", "")))
+        if "£" in i.text:
+            price_list.append(i.text.replace("£", "").replace(",", ""))
+        else:
+            price_list.append(i.text)
 
     property_agent = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-branchSummary")
     for i in property_agent:
@@ -102,6 +105,26 @@ while pages_remaining >= 0 and start_condition:
     pages_remaining -= 1
 
 
+key_list = []
+description_list = []
+
+for i in link_list:
+    url = i
+    browser.get(url)
+    sleep(2)
+    browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    try:
+        property_keys = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[3]/ul").text
+        key_list.append(property_keys)
+    except:
+        print("no keys")
+        key_list.append("None")
+    readmore_button = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[3]/div[3]/button[2]")
+    readmore_button.click()
+    property_desc = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[3]/div[3]/div").text
+    description_list.append(property_desc)
+    print(property_desc)
+
 # Check the length of the stored data (useful to know what selenium failed to scrape)
 
 print(f"Links: {len(link_list)}")
@@ -112,6 +135,8 @@ print(f"Address: {len(address_list)}")
 print(f"Price: {len(price_list)}")
 print(f"Agency: {len(agency_list)}")
 print(f"Number: {len(number_list)}")
+print(f"Keys: {len(key_list)}")
+print(f"Description: {len(description_list)}")
 
 # Store the data into a dictionary and convert to pandas dataframe. Later the scraped information will be saved as a .csv file
 
@@ -124,7 +149,9 @@ data = {
     "propertyPrice": price_list,
     "propertyAgency": agency_list,
     "propertyNumber": number_list,
-    "dateScraped": dt.datetime.now()
+    "dateScraped": dt.datetime.now(),
+    "propertyKeys": key_list,
+    "propoertyDescription": description_list
 }
 
 name = input("Please input the name for this file/dataset: ")
