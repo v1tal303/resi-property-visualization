@@ -1,53 +1,135 @@
-import requests
-from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from time import sleep
+import pandas as pd
+import datetime as dt
 
-# Get SF properties from Zillow - Address/Price/Link (depreciated as zillow is difficult to webscrape)
+today = dt.date.today()
+yesterday = today - dt.timedelta(days=1)
+yesterday_str = yesterday.strftime("%d-%m-%Y")
+today_str = today.strftime("%d-%m-%Y")
 
-def get_properties():
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0.2 Safari/605.1.15",
-        "Accept-Language": "en-US"
-    }
-    response = requests.get(
-        "https://www.zillow.com/homes/for_rent/1-_beds/?searchQueryState=%7B%22pagination%22%3A%7B%7D%2C%22usersSearchTerm%22%3Anull%2C%22mapBounds%22%3A%7B%22west%22%3A-122.69219435644531%2C%22east%22%3A-122.17446364355469%2C%22south%22%3A37.703343724016136%2C%22north%22%3A37.847169233586946%7D%2C%22isMapVisible%22%3Atrue%2C%22filterState%22%3A%7B%22fr%22%3A%7B%22value%22%3Atrue%7D%2C%22fsba%22%3A%7B%22value%22%3Afalse%7D%2C%22fsbo%22%3A%7B%22value%22%3Afalse%7D%2C%22nc%22%3A%7B%22value%22%3Afalse%7D%2C%22cmsn%22%3A%7B%22value%22%3Afalse%7D%2C%22auc%22%3A%7B%22value%22%3Afalse%7D%2C%22fore%22%3A%7B%22value%22%3Afalse%7D%2C%22pmf%22%3A%7B%22value%22%3Afalse%7D%2C%22pf%22%3A%7B%22value%22%3Afalse%7D%2C%22mp%22%3A%7B%22max%22%3A3000%7D%2C%22price%22%3A%7B%22max%22%3A872627%7D%2C%22beds%22%3A%7B%22min%22%3A1%7D%7D%2C%22isListVisible%22%3Atrue%2C%22mapZoom%22%3A11%7D",
-        headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
+# Selenium URL setup
 
-    list_of_links = soup.find_all(class_="list-card-link list-card-link-top-margin", href=True)
-    list_of_prices = soup.find_all(class_="list-card-price")
-    list_of_address = soup.find_all(class_="list-card-addr")
+s = Service("C:\Development\chromedriver.exe")
+browser = webdriver.Chrome(service=s)
+url = "https://www.rightmove.co.uk/"
+browser.get(url)
 
-    prices = [i.getText() for i in list_of_prices]
-    address = [i.getText() for i in list_of_address]
-    links = ["www.test.com" for i in list_of_prices]
-    return [address, prices, links]
+# Let the user input the search criteria in the browser.
 
-# Submit the information into google forms which can be viewed in an excel spreadsheet
+start_condition = False
+pages_remaining = 0
 
-def submit_form(data):
-    address = data[0]
-    prices = data[1]
-    links = data[2]
-    s = Service("C:\Development\chromedriver.exe")
-    browser = webdriver.Chrome(service=s)
-    url = 'https://docs.google.com/forms/d/e/1FAIpQLSdZQCTqZP4Xa50_WgGESoSjZnFC12pM_EgSO3fPpRCsHH63OQ/viewform?usp=sf_link'
-    browser.get(url)
+while start_condition == False:
+    if "find.html" in browser.current_url:
+        start_condition = True
+        no_of_pages_raw = browser.find_element(By.XPATH, "//*[@id='l-container']/div[3]/div/div/div/div[2]/span[3]")
+        pages_remaining = int(no_of_pages_raw.text)
+    else:
+        start_condition = False
 
-    for i in range(0, len(address)-1):
-        sleep(2)
-        address_input = browser.find_element(By.XPATH, "//*[@id='mG61Hd']/div[2]/div/div[2]/div[1]/div/div/div[2]/div/div[1]/div/div[1]/input")
-        address_input.send_keys(address[i])
-        price_input = browser.find_element(By.XPATH, "//*[@id='mG61Hd']/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div/div[1]/input")
-        price_input.send_keys(prices[i])
-        link_input = browser.find_element(By.XPATH, "//*[@id='mG61Hd']/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div/div[1]/input")
-        link_input.send_keys(links[i])
-        submit_button = browser.find_element(By.XPATH, "//*[@id='mG61Hd']/div[2]/div/div[3]/div[1]/div[1]/div/span")
-        submit_button.click()
-        new_button = browser.find_element(By.XPATH, "/html/body/div[1]/div[2]/div[1]/div/div[4]/a")
-        new_button.click()
+# Preset the list of items to be stored
 
-submit_form(get_properties())
+type_raw = []
+type_list = []
+address_list = []
+price_list = []
+agency_list = []
+date_list = []
+number_list = []
+link_list = []
+added_date_list = []
+
+# Run this loop when user have specified the search criteria and stop when there are no pages left.
+
+while pages_remaining >= 0 and start_condition:
+    sleep(2)
+    property_type = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-title")
+
+    for i in property_type:
+        type_raw.append(i.text)
+        if "apartment" in i.text.lower():
+            type_list.append("apartment")
+        elif "detached" in i.text.lower():
+            type_list.append("detached")
+        elif "semi" in i.text.lower():
+            type_list.append("semi")
+        elif "terrace" in i.text.lower():
+            type_list.append("terrace")
+        elif "bungalow" in i.text.lower():
+            type_list.append("bungalow")
+        elif "land" in i.text.lower():
+            type_list.append("land")
+        elif "plot" in i.text.lower():
+            type_list.append("plot")
+        elif "off-plan" in i.text.lower():
+            type_list.append("off-plan")
+        elif "park" in i.text.lower():
+            type_list.append("park home")
+        elif "mobile" in i.text.lower():
+            type_list.append("mobile home")
+        else:
+            type_list.append("other")
+
+    property_address = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-address")
+    for i in property_address:
+        address_list.append(i.text)
+
+    property_price = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-priceValue")
+    for i in property_price:
+        price_list.append(int(i.text.replace("£", "").replace(",", "")))
+
+    property_agent = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-branchSummary")
+    for i in property_agent:
+        agency_list.append(i.text.split("by ", 1)[1])
+
+    date_added = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-branchSummary")
+    for i in date_added:
+        added_date_list.append(i.text.split("by ", 1)[0])
+
+    property_number = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-contactsPhoneNumber")
+    for i in property_number:
+        number_list.append(i.text)
+
+    property_link = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-link")
+    for i in property_link[::2]:
+        link_list.append(str(i.get_attribute("href")))
+
+    next_button = browser.find_element(By.CSS_SELECTOR, ".pagination-button.pagination-direction.pagination-direction--next")
+    next_button.click()
+    pages_remaining -= 1
+
+
+# Check the length of the stored data (useful to know what selenium failed to scrape)
+
+print(f"Links: {len(link_list)}")
+print(f"Date added: {len(added_date_list)}")
+print(f"TypesRaw: {len(type_raw)}")
+print(f"Types: {len(type_list)}")
+print(f"Address: {len(address_list)}")
+print(f"Price: {len(price_list)}")
+print(f"Agency: {len(agency_list)}")
+print(f"Number: {len(number_list)}")
+
+# Store the data into a dictionary and convert to pandas dataframe. Later the scraped information will be saved as a .csv file
+
+data = {
+    "propertyLink": link_list,
+    "dateAdded": added_date_list,
+    "propertyTypeRaw": type_raw,
+    "propertyType": type_list,
+    "propertyAddress": address_list,
+    "propertyPrice": price_list,
+    "propertyAgency": agency_list,
+    "propertyNumber": number_list,
+    "dateScraped": dt.datetime.now()
+}
+
+name = input("Please input the name for this file/dataset: ")
+df = pd.DataFrame(data)
+df.to_csv(f"{name}.csv")
+
+print(df)
+
