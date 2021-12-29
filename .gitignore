@@ -10,3 +10,4 @@ bootstrap
 css
 static
 *.csv
+test.py
