@@ -34,13 +34,11 @@ try:
     print(property_keys)
 except:
     print("no keys")
-
 try:
     no_beds = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div[2]/div[2]/div[2]/div").text
     print(no_beds)
 except:
     print("No beds")
-
 try:
     no_bathrooms = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div[3]/div[2]/div[2]/div").text
     print(no_bathrooms)

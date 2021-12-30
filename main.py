@@ -44,35 +44,8 @@ added_date_list = []
 
 # Run this loop when user have specified the search criteria and stop when there are no pages left.
 
-while pages_remaining >= 0 and start_condition:
+while pages_remaining > 0 and start_condition:
     sleep(2)
-    property_type = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-title")
-
-    for i in property_type:
-        type_raw.append(i.text)
-        if "apartment" in i.text.lower():
-            type_list.append("apartment")
-        elif "detached" in i.text.lower():
-            type_list.append("detached")
-        elif "semi" in i.text.lower():
-            type_list.append("semi")
-        elif "terrace" in i.text.lower():
-            type_list.append("terrace")
-        elif "bungalow" in i.text.lower():
-            type_list.append("bungalow")
-        elif "land" in i.text.lower():
-            type_list.append("land")
-        elif "plot" in i.text.lower():
-            type_list.append("plot")
-        elif "off-plan" in i.text.lower():
-            type_list.append("off-plan")
-        elif "park" in i.text.lower():
-            type_list.append("park home")
-        elif "mobile" in i.text.lower():
-            type_list.append("mobile home")
-        else:
-            type_list.append("other")
-
     property_address = browser.find_elements(By.CSS_SELECTOR, ".propertyCard-address")
     for i in property_address:
         address_list.append(i.text)
@@ -107,6 +80,9 @@ while pages_remaining >= 0 and start_condition:
 
 key_list = []
 description_list = []
+beds_list = []
+bathroom_list = []
+detail_type_list = []
 
 for i in link_list:
     url = i
@@ -114,23 +90,40 @@ for i in link_list:
     sleep(2)
     browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     try:
-        property_keys = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[3]/ul").text
-        key_list.append(property_keys)
+        detail_type_list.append(browser.find_element(By.XPATH,"//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div[1]/div[2]/div[2]/div").text)
     except:
-        print("no keys")
+        try:
+            detail_type_list.append(browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[2]/div[1]/div/div[2]/div[2]/div").text)
+        except:
+            detail_type_list.append("None")
+    try:
+        key_list.append(browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[3]/ul").text)
+    except:
         key_list.append("None")
-    readmore_button = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[3]/div[3]/button[2]")
-    readmore_button.click()
+    try:
+        beds_list.append(browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div[2]/div[2]/div[2]/div").text[1])
+    except:
+        beds_list.append("None")
+    try:
+        bathroom_list.append(browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div[3]/div[2]/div[2]/div").text[1])
+    except:
+        bathroom_list.append("None")
+    try:
+        readmore_button = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[3]/div[3]/button[2]")
+        readmore_button.click()
+    except:
+        pass
     property_desc = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[3]/div[3]/div").text
     description_list.append(property_desc)
-    print(property_desc)
+
 
 # Check the length of the stored data (useful to know what selenium failed to scrape)
 
 print(f"Links: {len(link_list)}")
 print(f"Date added: {len(added_date_list)}")
-print(f"TypesRaw: {len(type_raw)}")
-print(f"Types: {len(type_list)}")
+print(f"Types: {len(detail_type_list)}")
+print(f"Bedrooms: {len(beds_list)}")
+print(f"Bathrooms: {len(bathroom_list)}")
 print(f"Address: {len(address_list)}")
 print(f"Price: {len(price_list)}")
 print(f"Agency: {len(agency_list)}")
@@ -143,8 +136,9 @@ print(f"Description: {len(description_list)}")
 data = {
     "propertyLink": link_list,
     "dateAdded": added_date_list,
-    "propertyTypeRaw": type_raw,
-    "propertyType": type_list,
+    "propertyType": detail_type_list,
+    "propertyBeds": beds_list,
+    "propertyBathrooms": bathroom_list,
     "propertyAddress": address_list,
     "propertyPrice": price_list,
     "propertyAgency": agency_list,
