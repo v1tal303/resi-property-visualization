@@ -77,12 +77,15 @@ while pages_remaining > 0 and start_condition:
     next_button.click()
     pages_remaining -= 1
 
+# Preset the list of items to be stored
 
 key_list = []
 description_list = []
 beds_list = []
 bathroom_list = []
 detail_type_list = []
+
+# Runs through each link individually and scrapes property type, bedrooms, bathrooms, keys, descriptions. Image scrape could be added later.
 
 for i in link_list:
     url = i
