@@ -4,6 +4,10 @@ UK housing market has hit a new record high of £254,822 in December 2021 which 
 
 <code>Property visualizer</code> is a simple Python interface that allows the user to scrape property listings from a website, store them in Pandas dataframe which can be visualized as a dot map with Google API, Branca and Folium.
 
+## How it works
+
+<img src = "./doc_images/HowitWorks_1.jpg">
+
 ## How to use
 
 1) Install <a href="https://chromedriver.chromium.org/getting-started">selenium webdriver for chrome</a> and place it in C:\Development\chromedriver.exe
