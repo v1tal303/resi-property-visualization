@@ -10,13 +10,10 @@ import pandas as pd
 class MapPlotter:
 
     def __init__(self, data):
-        # clean_price = pd.to_numeric(data['propertyPrice'], errors='coerce')
-        # print(clean_price.columns)
-        # self.data = clean_price
         self.data = data
-
         self.m = folium.Map([self.data['latitude'][1], self.data['longitude'][1]], zoom_start=10,
                             tiles="CartoDB positron")
+        # property minimum and maximum scale value
         self.linear = cm.linear.RdYlBu_09.scale(50000, 500000)
 
 
