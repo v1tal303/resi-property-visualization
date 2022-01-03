@@ -32,6 +32,6 @@ UK housing market has hit a new record high of £254,822 in December 2021 which 
 
 <img src = "./doc_images/visualization.jpg">
 
-## Legal
+## Disclaimer
 
 As per the terms and conditions of some websites such as <a href="https://www.rightmove.co.uk/this-site/terms-of-use.html"> this</a> any use of webscrapers, spiders, crawlers or any automated programs is unauthorised, therefore do not use this script.
