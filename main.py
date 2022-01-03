@@ -7,15 +7,12 @@ import datetime as dt
 from compilation import MapPlotter
 from geolocate import GeoLocate
 
+# User inputs/setup
 
 today = dt.datetime.now().strftime("%Y-%m-%d")
 name = today + input("Please input the name for this file/dataset: ")
-
-
 print(f"Your file name will be: {name}")
-
 data_type = input(f"Do you want 'detailed' or 'quick' data? ")
-
 print(f"Please select a search criteria through the browser...")
 
 # Selenium URL setup
@@ -25,12 +22,12 @@ browser = webdriver.Chrome(service=s)
 url = "https://www.rightmove.co.uk/"
 browser.get(url)
 
-# Let the user input the search criteria in the browser.
+# Let the user input the search criteria in the browser. Change start_condition to true, when 'find.html' is in the link
 
 start_condition = False
 pages_remaining = 0
 
-while start_condition == False:
+while not start_condition:
     if "find.html" in browser.current_url:
         start_condition = True
         no_of_pages_raw = browser.find_element(By.XPATH, "//*[@id='l-container']/div[3]/div/div/div/div[2]/span[3]")
@@ -38,7 +35,7 @@ while start_condition == False:
     else:
         start_condition = False
 
-# Preset the list of items to be stored
+# Pre-set the list of items to be stored
 
 type_raw = []
 type_list = []
@@ -50,7 +47,7 @@ number_list = []
 link_list = []
 added_date_list = []
 
-# Run this loop when user have specified the search criteria and stop when there are no pages left.
+# Run this loop when 'find.html' is in the URL and stop the loop when there are no pages left.
 
 while pages_remaining > 0 and start_condition:
     sleep(2)
@@ -85,9 +82,12 @@ while pages_remaining > 0 and start_condition:
     for i in property_link[::2]:
         link_list.append(str(i.get_attribute("href")))
 
-    next_button = browser.find_element(By.CSS_SELECTOR, ".pagination-button.pagination-direction.pagination-direction--next")
+    next_button = browser.find_element(By.CSS_SELECTOR, ".pagination-button.pagination-direction.pagination-direction"
+                                                        "--next")
     next_button.click()
     pages_remaining -= 1
+
+    # If user selected the 'detailed' scrape then run the code below
 
 if data_type == 'detailed':
 
@@ -99,7 +99,8 @@ if data_type == 'detailed':
     bathroom_list = []
     detail_type_list = []
 
-    # Runs through each link individually and scrapes property type, bedrooms, bathrooms, keys, descriptions. Image scrape could be added later.
+    # Runs through each link individually and scrapes property type, bedrooms, bathrooms, keys, descriptions. Image
+    # scrape could be added later. Except used to overcome the website changes.
 
     for i in link_list:
         url = i
@@ -107,10 +108,14 @@ if data_type == 'detailed':
         sleep(2)
         browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         try:
-            detail_type_list.append(browser.find_element(By.XPATH,"//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div[1]/div[2]/div[2]/div").text)
+            detail_type_list.append(browser.find_element(By.XPATH,
+                                                         "//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div["
+                                                         "1]/div[2]/div[2]/div").text)
         except:
             try:
-                detail_type_list.append(browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[2]/div[1]/div/div[2]/div[2]/div").text)
+                detail_type_list.append(browser.find_element(By.XPATH,
+                                                             "//*[@id='root']/main/div/div[2]/div/article[2]/div["
+                                                             "1]/div/div[2]/div[2]/div").text)
             except:
                 detail_type_list.append("None")
         try:
@@ -118,23 +123,30 @@ if data_type == 'detailed':
         except:
             key_list.append("None")
         try:
-            beds_list.append(browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div[2]/div[2]/div[2]/div").text[1])
+            beds_list.append(browser.find_element(By.XPATH,
+                                                  "//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div[2]/div["
+                                                  "2]/div[2]/div").text[
+                                 1])
         except:
             beds_list.append("None")
         try:
-            bathroom_list.append(browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div[3]/div[2]/div[2]/div").text[1])
+            bathroom_list.append(browser.find_element(By.XPATH,
+                                                      "//*[@id='root']/main/div/div[2]/div/article[2]/div[2]/div["
+                                                      "3]/div[2]/div[2]/div").text[
+                                     1])
         except:
             bathroom_list.append("None")
         try:
-            readmore_button = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[3]/div[3]/button[2]")
+            readmore_button = browser.find_element(By.XPATH,
+                                                   "//*[@id='root']/main/div/div[2]/div/article[3]/div[3]/button[2]")
             readmore_button.click()
         except:
             pass
         property_desc = browser.find_element(By.XPATH, "//*[@id='root']/main/div/div[2]/div/article[3]/div[3]/div").text
         description_list.append(property_desc)
 
-
-    # Check the length of the stored data (useful to know what selenium failed to scrape)
+    # Check the length of the stored data (useful to know what selenium failed to scrape). All data should be equal
+    # in length
 
     print(f"Links: {len(link_list)}")
     print(f"Date added: {len(added_date_list)}")
@@ -148,7 +160,8 @@ if data_type == 'detailed':
     print(f"Keys: {len(key_list)}")
     print(f"Description: {len(description_list)}")
 
-    # Store the data into a dictionary and convert to pandas dataframe. Later the scraped information will be saved as a .csv file
+    # Store the data into a dictionary and convert to pandas dataframe. Later the scraped information will be saved
+    # as a .csv file
 
     data = {
         "propertyLink": link_list,
@@ -162,10 +175,13 @@ if data_type == 'detailed':
         "propertyNumber": number_list,
         "dateScraped": dt.datetime.now(),
         "propertyKeys": key_list,
-        "propoertyDescription": description_list
+        "propertyDescription": description_list
     }
 
     df = pd.DataFrame(data)
+
+    # If user hasn't selected the 'detailed' scrape then run the code below. This will scape less data and will not
+    # go into individual listing URL's
 
 else:
     print(f"Links: {len(link_list)}")
@@ -189,6 +205,7 @@ else:
 
     df = pd.DataFrame(data)
 
+    # Ask the user if they would like to plot the listings on a map as a head dot map.
 
 visualize = input("Do you want to visualize your data? Yes/No: ")
 
@@ -226,5 +243,3 @@ if visualize == 'Yes':
 else:
     df.to_csv(f"{name}.csv")
     print(f"Your file has been saved as {name}.csv")
-
-
