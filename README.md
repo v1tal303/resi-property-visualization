@@ -2,7 +2,7 @@
 
 UK housing market has hit a new record high of £254,822 in December 2021 which is an increase of 10.4% over the year and a largest annual increase since 2006.
 
-<code>Property visualizer</code> is a simple Python interface that allows the user to scrape property listings from a website, store them in Pandas dataframe which can be visualized as a dot map with Google API, Branca and Folium.
+<code>Property visualizer</code> is a simple Python interface that allows the user to scrape currently listed properties from a website, store them in Pandas dataframe which can be visualized as a dot map with Google API, Branca and Folium.
 
 ## How it works
 
@@ -31,3 +31,7 @@ UK housing market has hit a new record high of £254,822 in December 2021 which 
 4) When the search is complete, the csv (and html file if visualization was requested) will be saved on your computer.
 
 <img src = "./doc_images/visualization.jpg">
+
+## Legal
+
+As per the terms and conditions of some websites such as <a href="https://www.rightmove.co.uk/this-site/terms-of-use.html"> this</a> any use of webscrapers, spiders, crawlers or any automated programs is unauthorised, therefore do not use this script.
