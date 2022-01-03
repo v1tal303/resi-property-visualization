@@ -12,6 +12,8 @@ UK housing market has hit a new record high of £254,822 in December 2021 which 
 
 1) Install <a href="https://chromedriver.chromium.org/getting-started">selenium webdriver for chrome</a> and place it in C:\Development\chromedriver.exe
 
+<img src = "./doc_images/seleniumsetup.jpg">
+
 2) To enable visualization feature, Google Geolocate API key will be required. Please provide a key in <code>geolocate.py</code>
 
 3) Run <code>main.py</code> and select if you want detailed (includes no. bathrooms, bedrooms, keys, descriptions) or quick run.
