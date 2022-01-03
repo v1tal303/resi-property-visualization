@@ -195,11 +195,15 @@ visualize = input("Do you want to visualize your data? Yes/No: ")
 if visualize == 'Yes':
     try:
         print("Please wait, retrieving locations from Google Maps.")
+
         # Add latitude and longitude with Google Maps API and save as a csv file
+
         return_locations = GeoLocate(df)
         geo_located = return_locations.locate(name)
         df_located = pd.read_csv(geo_located)
+
         # Clean prices, latitude, longitude
+
         nums = pd.to_numeric(df_located['propertyPrice'], errors='coerce')
         clean_num = df_located[(nums.notnull())]
         lat = pd.to_numeric(clean_num['latitude'], errors='coerce')
@@ -207,7 +211,9 @@ if visualize == 'Yes':
         lon = pd.to_numeric(clean_lat['longitude'], errors='coerce')
         clean_lon = clean_lat[(lon.notnull())]
         clean_data = clean_lon.drop(clean_lon.columns[0], axis=1)
+
         # Generate a folium and branca HTML visualization
+
         map = MapPlotter(clean_data)
         map.generate_map(f"{name}.html")
         print(f"Your HTML has been saved: {name}.html")
