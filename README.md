@@ -28,7 +28,7 @@ UK housing market has hit a new record high of £254,822 in December 2021 which 
 
 <img src = "./doc_images/websitesearch.jpg">
 
-4) When the search is complete, the csv (and html file if visualization was requested) will be saved on your computer.
+5) When the search is complete, the csv (and html file if visualization was requested) will be saved on your computer.
 
 <img src = "./doc_images/visualization.jpg">
 
