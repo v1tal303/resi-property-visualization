@@ -1,5 +1,10 @@
 import pandas as pd
 import glob
+import config
+import numpy as np
+
+
+# Combine multiple csv into one dataframe
 
 path = r'C:\Users\murci\Documents\GitHub\resi-property-webscrape\csv' # use your path
 all_files = glob.glob(path + "/*.csv")
@@ -12,12 +17,16 @@ for filename in all_files:
 
 frame = pd.concat(li, axis=0, ignore_index=True)
 
-print(list(frame))
 
-df = frame.drop_duplicates(subset=['URL'], keep=False)
+
+# Clean the data and remove duplicate URL's
+
+df = frame.drop_duplicates(subset=['URL'], keep=False).copy()
 print(len(frame))
 
-df.loc[df['URL'].str.contains('zoopla'), 'sport'] = 'ball sport'
+
+df['URL'] = df.URL.replace({config.zp: "https://www.zoopla.co.uk/for-sale/details/", config.otm: 'https://www.onthemarket.com/details/', config.rm:"https://www.rightmove.co.uk/properties/"}, regex=True)
 
 
-frame.to_csv("testing.csv")
+
+df.to_csv("testing.csv")
