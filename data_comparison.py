@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import requests
 
 # Load in the data
 
@@ -18,13 +19,31 @@ main_data["Postcode"] = main_data["Postcode"].str.split().str[0]
 
 mergeddata = pd.merge(main_data, pc_data, on=['Postcode'], how='inner')
 
-mergeddata["PriceAverageDifference"] = mergeddata['Price'].sub(mergeddata['Avg asking price'], axis = 0)
+# Clean Avg asking price by removing "," and convert to numeric
+
+mergeddata['Avg asking price'] = pd.to_numeric(mergeddata['Avg asking price'].replace({",":""}, regex=True))
+# mergeddata["FullPostcode"] = mergeddata["FullPostcode"].replace({" ":""}, regex=True)
+
+# Add Difference from average price
+
+mergeddata["PricefromAverage"] = mergeddata['Price'] - mergeddata["Avg asking price"]
+
+postcode_endpoint = "https://api.postcodes.io/postcodes?q="+mergeddata["FullPostcode"][0]
+
+response = requests.get(url=postcode_endpoint)
+
+results = response.json()
+
+
+print(results)
+
+
+
+
+
+
+
 
 print(mergeddata)
 
-mergeddata.to_csv("testing2.csv")
-
-
-# (np.where(main_data["Price"] < pc_data["Avg asking price"], "Below Average", "Above Average"))
-#
-# main_data['priceData'] = np.where(main_data['Postcode2'] == pc_data['Postcode'], "True", 'False')
+mergeddata.to_csv("testing3.csv")
