@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import requests
+from time import sleep
 
 # Load in the data
 
@@ -28,22 +29,34 @@ mergeddata['Avg asking price'] = pd.to_numeric(mergeddata['Avg asking price'].re
 
 mergeddata["PricefromAverage"] = mergeddata['Price'] - mergeddata["Avg asking price"]
 
-postcode_endpoint = "https://api.postcodes.io/postcodes?q="+mergeddata["FullPostcode"][0]
+# Setup additional columns in the dataframe
 
+postcode_endpoint = "https://api.postcodes.io/postcodes?q="+mergeddata["FullPostcode"][1]
 response = requests.get(url=postcode_endpoint)
-
 results = response.json()
+result_data = results["result"][0]
+result_data.pop("codes", None)
+for key, value in result_data.items():
+    mergeddata[key] = value
 
+# Iterate over all postcodes
 
-print(results)
+count = 0
 
+for index, row in mergeddata.iterrows():
+    print(mergeddata["FullPostcode"][index])
+    postcode_endpoint = "https://api.postcodes.io/postcodes?q="+mergeddata["FullPostcode"][index]
+    print(postcode_endpoint)
+    response = requests.get(url=postcode_endpoint)
+    results = response.json()
+    result_data = results["result"][0]
+    result_data.pop("codes", None)
+    for key, value in result_data.items():
+        mergeddata[key][index] = value
+    print(index)
+    count += 1
+    if count % 10000 == 0:
+        sleep(600)
 
-
-
-
-
-
-
-print(mergeddata)
 
 mergeddata.to_csv("testing3.csv")
