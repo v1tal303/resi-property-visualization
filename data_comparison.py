@@ -60,3 +60,9 @@ for index, row in mergeddata.iterrows():
 
 
 mergeddata.to_csv("testing3.csv")
+
+
+# TODO:
+#  1) Clean up the code and add documentation
+#  2) Find quicker methods to analyze postcode data by grouping as a lot of postcodes repeat.
+
